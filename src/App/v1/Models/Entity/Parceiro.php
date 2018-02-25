@@ -24,6 +24,11 @@ class Parceiro{
     * @Column(type="datetime")
     */
     protected $par_dti_data;
+    /**
+    * @ManyToOne(targetEntity="usuario")
+    * @JoinColumn(name="usu_int_codigo", referencedColumnName="usu_int_codigo")
+    */
+    protected $usu_int_codigo;
 
     public function getPar_int_codigo(){
         return $this->par_int_codigo;

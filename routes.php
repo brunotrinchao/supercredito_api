@@ -1,13 +1,15 @@
 <?
-
+use \Psr\Http\Message\ServerRequestInterface as Request;
+use \Psr\Http\Message\ResponseInterface as Response;
+use Firebase\JWT\JWT;
 /**
  * Grupo dos enpoints iniciados por v1
  */
 $app->group('/v1', function() {
-
-    // Administracao
-    $this->group('/administracao/parceiros', function() {
-        $this->get('', \App\v1\Administracao\ParceirosController::class . ':listar');
+    // Usuario
+    $this->group('/usuario', function() {
+        $this->get('', \App\v1\Controllers\UsuarioController::class . ':listar');
+        $this->post('', \App\v1\Controllers\UsuarioController::class . ':create');
     });
 
     // // Usuário

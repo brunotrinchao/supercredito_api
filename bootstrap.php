@@ -1,16 +1,24 @@
 <?
 
+require_once './vendor/autoload.php';
+require_once './configs.php';
+
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
 use Psr7Middlewares\Middleware\TrailingSlash;
 use Monolog\Logger;
 use Firebase\JWT\JWT;
+
 /**
  * Configurações
  */
 $configs = [
     'settings' => [
         'displayErrorDetails' => true,
+        'pagination' => [
+            'default_per_page' => 20,
+            'max_per_page' => 100,
+        ],
     ]   
 ];
 /**
@@ -61,7 +69,8 @@ $container['notFoundHandler'] = function ($container) {
 // TODO - Alterar o nome do log para o dia atual
 $container['logger'] = function($container) {
     $logger = new Monolog\Logger('api-log');
-    $logfile = __DIR__ . '/log/api-log.log';
+    $today = date('Y-m-d');
+    $logfile = __DIR__ . "/log/{$today}-api-log.log";
     $stream = new Monolog\Handler\StreamHandler($logfile, Monolog\Logger::DEBUG);
     $fingersCrossed = new Monolog\Handler\FingersCrossedHandler(
         $stream, Monolog\Logger::INFO);
@@ -69,24 +78,25 @@ $container['logger'] = function($container) {
     
     return $logger;
 };
+
+
 $isDevMode = true;
+/**
+ * Diretório de Entidades e Metadata do Doctrine
+ */
+$config = Setup::createAnnotationMetadataConfiguration(array(__DIR__."/src/app/v1/Models/Entity"), $isDevMode);
 
-$paths = array(__DIR__."/src/App");
-
-$config = Setup::createAnnotationMetadataConfiguration($paths, $isDevMode);
-// or if you prefer yaml or XML
-//$config = Setup::createXMLMetadataConfiguration(array(__DIR__."/config/xml"), $isDevMode);
-//$config = Setup::createYAMLMetadataConfiguration(array(__DIR__."/config/yaml"), $isDevMode);
-
-// database configuration parameters
 $conn = array(
-            'dbname' => 'supercredito_db',
-			'user' => 'root',
-			'password' => '',
-			'host' => '127.0.0.1',
-			'driver' => 'pdo_mysql'
-        );
-// obtaining the entity manager
+    'dbname' => 'supercredito_db',
+    'user' => 'root',
+    'password' => '',
+    'host' => '127.0.0.1',
+    'driver' => 'pdo_mysql',
+    'charset'  => 'utf8',
+    'driverOptions' => array(
+        1002 => 'SET NAMES utf8'
+    )
+);
 /**
  * Instância do Entity Manager
  */
@@ -96,6 +106,7 @@ $entityManager = EntityManager::create($conn, $config);
  * Coloca o Entity manager dentro do container com o nome de em (Entity Manager)
  */
 $container['em'] = $entityManager;
+
 /**
  * Token do nosso JWT
  */
@@ -142,27 +153,3 @@ $app->add(new \Slim\Middleware\JwtAuthentication([
     "realm" => "Protected",
     "secret" => JWT_KEY
 ]));
-/**
- * Proxys confiáveis
- */
-// $trustedProxies = ['0.0.0.0', '127.0.0.1'];
-// $app->add(new RKA\Middleware\SchemeAndHost($trustedProxies));
-
-// $app->add(new \Slim\Middleware\JwtAuthentication([
-//     "header" => "Authorization",
-//     "path" => ["/"],
-//     "passthrough" => ["publica"],
-//     "secret" => JWT_KEY,
-//     "callback" => function (Request $request, Response $response, $arguments) use ($container) {
-//         $container["user"] = json_decode(json_encode($arguments["decoded"]), true);
-//     },
-//     "secure" => SECURITY_SERVERSLIM,
-//     "relaxed" => ["localhost"],
-//     "error" => function (Request $request, Response $response, $arguments) {
-//         $data["status"] = "error";
-//         $data["message"] = $arguments["message"];
-//         return $response
-//             ->withHeader("Content-Type", "application/json")
-//             ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
-//     }
-// ]));

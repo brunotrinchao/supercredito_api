@@ -1,8 +1,8 @@
-<?
+<?php
 
 namespace App\Lib;
 
-class Helper
+class Helpers
 {
     public static function validaEmail($email){
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -20,6 +20,7 @@ class Helper
         // Verifica se nenhuma das sequências abaixo foi digitada, caso seja, retorna falso
         if (strlen($cpf) != 11 || $cpf == '00000000000' || $cpf == '11111111111' || $cpf == '22222222222' || $cpf == '33333333333' || $cpf == '44444444444' || $cpf == '55555555555' || $cpf == '66666666666' || $cpf == '77777777777' || $cpf == '88888888888' || $cpf == '99999999999') {
             return false;
+        } else {   // Calcula os números para verificar se o CPF é verdadeiro
             for ($t = 9; $t < 11; $t++) {
                 for ($d = 0, $c = 0; $c < $t; $c++) {
                     $d += $cpf{$c} * (($t + 1) - $c);
@@ -149,6 +150,54 @@ class Helper
     {
         return ($paramvalue == 'null' || $paramvalue == 'NULL' || $paramvalue == 'undefined' || empty($paramvalue));
     }
+
+    public static function publicarMensagemSNS($topico, $mensagem)
+    {
+        try {
+            $client = \Aws\Sns\SnsClient::factory(array(
+                'key'    => AWS_KEY,
+                'secret' => AWS_SECRET,
+                'region' => AWS_REGION,
+                'validation' => false
+            ));
+
+            $arrayTopicos = array(
+                'signup1' => 'arn:aws:sns:sa-east-1:392198478036:aut-signup1',
+                'signup2' => 'arn:aws:sns:sa-east-1:392198478036:aut-signup2',
+                'contrata' => 'arn:aws:sns:sa-east-1:392198478036:aut-contratacao',
+                'kontroli' => 'arn:aws:sns:sa-east-1:392198478036:aut-kontroli',
+                'recarga_automatica' => 'arn:aws:sns:sa-east-1:392198478036:aut-recargaautomatica',
+                'adm_intercom' => 'arn:aws:sns:sa-east-1:392198478036:adm-intercom',
+                'intercom_integra' => 'arn:aws:sns:sa-east-1:392198478036:aut-intercomintegra',
+                'fiscal_xml' => 'arn:aws:sns:sa-east-1:392198478036:aut-fiscalxml',
+                'envia_email' => 'arn:aws:sns:sa-east-1:392198478036:aut-enviaemail',
+                'envia_sms' => 'arn:aws:sns:sa-east-1:392198478036:aut-enviasms',
+                'contrata_servico' => 'arn:aws:sns:sa-east-1:392198478036:aut-contrataservico',
+                'posta_slack' => 'arn:aws:sns:sa-east-1:392198478036:aut-postarslack'
+            );
+
+            if (!empty($arrayTopicos[$topico]) && !empty($mensagem)) {
+                if (SERVER == 'P') {
+                    $result = $client->publish(array(
+                        'TopicArn' => $arrayTopicos[$topico],
+                        'Message' => json_encode($mensagem)
+                    ));
+                }
+
+                $ret['status'] = true;
+                $ret['msg'] = 'Publicado com sucesso';
+            } else {
+                $ret['status'] = false;
+                $ret['msg'] = 'Ação não encontrada';
+            }
+        } catch (Exception $e) {
+            $ret['status'] = false;
+            $ret['msg'] = $e->getMessage();
+        }
+
+        return $ret;
+    }
+
     /**
      * Formatar um número com 2 casas decimais após a virgula e ponto para diferenciar os milhares
      *
@@ -205,4 +254,14 @@ class Helper
     {
         return str_replace(array(".", "-", "/"), "", $text);
     }
+
+    public function hashSufixoCelular($celular)
+    {
+        list($pre, $suf) = explode('-', $celular);
+
+          return substr(preg_replace("/[^0-9]/", "", md5($suf)), 0, 6);
+    }
+
+
+
 }

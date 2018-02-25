@@ -2,8 +2,8 @@
 namespace App\v1\Controllers;
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
+use App\Lib\Helpers;
 use App\v1\Models\Entity\Usuario;
-use App\Lib\Helper;
 /**
  * Controller de usuario
  */
@@ -45,23 +45,56 @@ class UsuarioController {
      * @return Response
      */
     public function create($request, $response, $args) {
+
         $params = (object) $request->getParams();
+        $files = $request->getUploadedFiles();
+        
         $entityManager = $this->container->get('em');
-        
-        // Valida e-mail
-        if(!(new Helper())->validaEmail($params->usu_var_email)){
-            throw new \Exception("E-mail inválido.", 400); 
+        $usuario = (new Usuario())->setUsu_var_nome($params->usu_var_nome)
+                    ->setUsu_var_sobrenome($params->usu_var_sobrenome)
+                    ->setUsu_var_senha(sha1($params->usu_var_senha))
+                    ->setUsu_var_nivel(strtoupper($params->usu_var_nivel));
+        // //Validações
+        if($params->usu_var_email){
+            if(!(new Helpers())->validaEmail($params->usu_var_email)){
+                throw new \Exception("E-mail inválido.", 400); 
+            }
+            $usuario->setUsu_var_email($params->usu_var_email);
         }
+        if($params->usu_var_telefone){
+            $usuario->setUsu_var_telefone($params->usu_var_telefone);
+        }
+        if($files){
+            $foto = $files['usu_var_foto'];
+            if ($foto->getError() === UPLOAD_ERR_OK) {
+                $extension = pathinfo($foto->getClientFilename(), PATHINFO_EXTENSION);
+                $basename = bin2hex(random_bytes(8));
+                $filename = sprintf('%s.%0.8s', $basename, $extension);
+                if (!file_exists(PATH_UPLOADS . DIRECTORY_SEPARATOR . date('Y-m-d'))) {
+                    mkdir(PATH_UPLOADS . DIRECTORY_SEPARATOR . date('Y-m-d'), 0777, true);
+                }
+                if (!file_exists(PATH_UPLOADS . DIRECTORY_SEPARATOR . date('Y-m-d') . DIRECTORY_SEPARATOR . 'avatar')) {
+                    mkdir(PATH_UPLOADS . DIRECTORY_SEPARATOR . date('Y-m-d') . DIRECTORY_SEPARATOR . 'avatar', 0777, true);
+                }
+                $foto->moveTo(PATH_UPLOADS . DIRECTORY_SEPARATOR . date('Y-m-d') . DIRECTORY_SEPARATOR . 'avatar' . DIRECTORY_SEPARATOR . $filename);
+                $usuario->setUsu_var_foto('avatar' . DIRECTORY_SEPARATOR . date('Y-m-d') . DIRECTORY_SEPARATOR . $filename);
+            }
+            
+        }
+
+        $entityManager->persist($usuario);
+        $entityManager->flush();
+
+        /**
+         * Registra a criação do livro
+         */
+        $logger = $this->container->get('logger');
+        $logger->info('Usuário criado', $usuario->getValues());
+                            
+        $return = $response->withJson($entityManager, 201)
+            ->withHeader('Content-type', 'application/json');
+        return $return;  
         
-        $user = (new Usuario())->setUsu_var_nome($params->usu_var_nome)
-                            ->setUsu_var_sobrenome($params->usu_var_sobrenome)
-                            ->setUsu_var_email($params->usu_var_email)
-                            ->setEnd_int_codigo($params->end_int_codigo)
-                            ->setPar_int_codigo($params->par_int_codigo)
-                            ->setCon_int_codigo($params->con_int_codigo)
-                            ->setUsu_var_foto($params->con_int_codigo);
-        
-        print_r($user);
              
     }
     /**

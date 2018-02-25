@@ -30,20 +30,20 @@ class Usuario{
     */
     protected $usu_var_email;
     /**
-    * @ManyToOne(targetEntity="parceiro")
-    * @JoinColumn(name="par_int_codigo", referencedColumnName="par_int_codigo")
+    * @var string
+    * @Column(type="string", length=1)
     */
-    protected $par_int_codigo;
+    protected $usu_var_nivel;
     /**
-    * @ManyToOne(targetEntity="endereco")
-    * @JoinColumn(name="end_int_codigo", referencedColumnName="end_int_codigo")
+    * @var string
+    * @Column(type="string", length=255)
     */
-    protected $end_int_codigo;
+    protected $usu_var_telefone;
     /**
-    * @ManyToOne(targetEntity="contato")
-    * @JoinColumn(name="con_int_codigo", referencedColumnName="con_int_codigo")
+    * @var string
+    * @Column(type="string", length=255)
     */
-    protected $con_int_codigo;
+    protected $usu_var_senha;
     /**
     * @var string
     * @Column(type="string", length=255)
@@ -125,6 +125,48 @@ class Usuario{
     
     public function setUsu_var_foto($usu_var_foto){
         $this->usu_var_foto=$usu_var_foto;
+    }
+    
+    public function getUsu_var_nivel(){
+        return $this->usu_var_nivel;
+    }
+    
+    public function setUsu_var_nivel($usu_var_nivel){
+        if (!$usu_var_nivel ) {
+            throw new \InvalidArgumentException("Nível de acesso é obrigatório.", 400);
+        }
+        if (strlen($usu_var_nivel) > 1) {
+            throw new \InvalidArgumentException("Nível de acesso apenas um catacter.", 400);
+        }
+        $this->usu_var_nivel=$usu_var_nivel;
+        return $this;
+    }
+    
+    public function getUsu_var_telefone(){
+        return $this->usu_var_telefone;
+    }
+    
+    public function setUsu_var_telefone($usu_var_telefone){
+        $this->usu_var_telefone=$usu_var_telefone;
+    }
+    
+    public function getUsu_var_senha(){
+        return $this->usu_var_senha;
+    }
+    
+    public function setUsu_var_senha($usu_var_senha){
+        if (!$usu_var_senha && !is_string($usu_var_senha)) {
+            throw new \InvalidArgumentException("Senha é obrigatório.", 400);
+        }
+        $this->usu_var_senha=$usu_var_senha;
+        return $this;
+    }
+
+    /**
+     * @return App\Models\Entity\Usuario
+     */
+    public function getValues() {
+        return get_object_vars($this);
     }
 
 }

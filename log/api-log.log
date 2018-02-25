@@ -1,7 +1,0 @@
-[2018-02-23 01:59:57] api-log.INFO: Usuario criado {"id":null,"name":"Bruno 6","email":"bruno3@simples.vet"} []
-[2018-02-23 02:00:44] api-log.INFO: Usuario criado {"id":7,"name":"Bruno 7","email":"bruno3@simples.vet"} []
-[2018-02-24 00:29:02] api-log.WARNING: Usuario 4 não encontrado [] []
-[2018-02-24 00:30:28] api-log.WARNING: Usuario 4 não encontrado [] []
-[2018-02-24 00:44:11] api-log.INFO: Usuario criado {"id":8,"name":"Bruno 7","email":"bruno@simples.vet"} []
-[2018-02-24 00:44:39] api-log.INFO: Usuario criado {"id":9,"name":"Bruno 8","email":"bruno@simples.vet"} []
-[2018-02-24 02:05:19] api-log.INFO: Usuario criado {"id":10,"name":"Bruno 8","email":"bruno@simples.vet"} []

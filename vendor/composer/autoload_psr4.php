@@ -19,6 +19,7 @@ return array(
     'Psr\\Container\\' => array($vendorDir . '/psr/container/src'),
     'Psr7Middlewares\\' => array($vendorDir . '/oscarotero/psr7-middlewares/src'),
     'Monolog\\' => array($vendorDir . '/monolog/monolog/src/Monolog'),
+    'Lib\\' => array($baseDir . '/src/Lib'),
     'Interop\\Container\\' => array($vendorDir . '/container-interop/container-interop/src/Interop/Container'),
     'Firebase\\JWT\\' => array($vendorDir . '/firebase/php-jwt/src'),
     'FastRoute\\' => array($vendorDir . '/nikic/fast-route/src'),

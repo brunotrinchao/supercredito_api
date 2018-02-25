@@ -1,9 +1,9 @@
 <?
 
-if (strpos($_SERVER['SERVER_NAME'], 'localhost') !== false) {
-    define('PHP_TIMEZONE', 'America/Bahia');
-    define('SECURITY_SERVERSLIM', true);
-}
+
+define(PATH_BASE, __DIR__);
+define(PATH_UPLOADS, PATH_BASE . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR);
+
 date_default_timezone_set(PHP_TIMEZONE);
 header('Content-Type: text/html; charset=utf-8');
 
